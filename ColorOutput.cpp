@@ -16,13 +16,18 @@
  *
  *=========================================================================*/
 
-// This file is provided to demonstrate the interface to the code, and to show that it works
-// on known input data.
+// This file is provided for the sole purpose of creating an image to demonstrate the pixel
+// ordering for the associated article. It creates a black image with the outline of a white square
+// and then traces the square to obtain the ordering. The output is a color image with a Hot colormap
+// applied to the pixel order image.
 
 // ITK
 #include <itkImage.h>
 #include <itkImageFileReader.h>
+#include <itkImageFileWriter.h>
 #include <itkImageRegionConstIterator.h>
+#include <itkRescaleIntensityImageFilter.h>
+#include <itkScalarToRGBColormapImageFilter.h>
 
 #include "MooreTracing.h"
 
@@ -33,12 +38,45 @@ int main(int argc, char *argv[])
   UnsignedCharImageType::Pointer image = UnsignedCharImageType::New();
   CreateImage(image);
   
+  typedef  itk::ImageFileWriter< UnsignedCharImageType  > InputWriterType;
+  InputWriterType::Pointer inputWriter = InputWriterType::New();
+  inputWriter->SetFileName("input.png");
+  inputWriter->SetInput(image);
+  inputWriter->Update();
+  
+  // Prepare the output image
+  UnsignedCharImageType::Pointer output = UnsignedCharImageType::New();
+  CreateImage(output);
+  
   std::vector< itk::Index<2> > path = MooreTrace(image);
   
   for(unsigned int i = 0; i < path.size(); ++i)
     {
-    std::cout << path[i] << std::endl;
+    output->SetPixel(path[i], i);
+    std::cout << "Set pixel " << path[i] << " to " <<  i << std::endl;
+  
     }
+    
+  typedef itk::RescaleIntensityImageFilter< UnsignedCharImageType, UnsignedCharImageType > RescaleFilterType;
+  RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
+  rescaleFilter->SetInput(output);
+  rescaleFilter->SetOutputMinimum(0);
+  rescaleFilter->SetOutputMaximum(255);
+  rescaleFilter->Update();
+  
+  typedef itk::RGBPixel<unsigned char>    RGBPixelType;
+  typedef itk::Image<RGBPixelType, 2>  RGBImageType;
+  typedef itk::ScalarToRGBColormapImageFilter<UnsignedCharImageType, RGBImageType> RGBFilterType;
+  RGBFilterType::Pointer rgbfilter = RGBFilterType::New();
+  rgbfilter->SetInput(rescaleFilter->GetOutput());
+  rgbfilter->SetColormap( RGBFilterType::Hot );
+  rgbfilter->Update();
+ 
+  typedef  itk::ImageFileWriter< RGBImageType > OutputWriterType;
+  OutputWriterType::Pointer outputWriter = OutputWriterType::New();
+  outputWriter->SetFileName("output.png");
+  outputWriter->SetInput(rgbfilter->GetOutput());
+  outputWriter->Update();
   
   return EXIT_SUCCESS;
 }

@@ -16,6 +16,7 @@
  *
  *=========================================================================*/
 
+// This file is provided to perform the algorithm on your own input data.
 
 // ITK
 #include <itkImage.h>

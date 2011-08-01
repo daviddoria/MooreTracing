@@ -23,6 +23,8 @@
 
 std::vector< itk::Offset<2> > GetAllOffsets()
 {
+  // In ITK, Offset<2> is indexed with (row, column), so the following
+  // sets up the 8-neighbor indices in counter-clockwise order.
   std::vector< itk::Offset<2> > offsets;
   
   itk::Offset<2> offset;
