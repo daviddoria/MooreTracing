@@ -8,7 +8,8 @@ SET( INSTALL_DIR ${CMAKE_INSTALL_PREFIX} )
 # Tell CMake to also look in the source directory to find some .cmake files (Eigen3 and Umfpack)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 
-FIND_PACKAGE(ITK REQUIRED)
+#FIND_PACKAGE(ITK REQUIRED)
+FIND_PACKAGE(ITK REQUIRED ITKCommon ITKIOImageBase ITKIOPNG ITKIOMeta ITKImageIntensity ITKColormap)
 INCLUDE(${ITK_USE_FILE})
 
 ADD_EXECUTABLE(MooreTracingDemo MooreTracingDemo.cpp MooreTracing.cpp)
